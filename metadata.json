@@ -1,0 +1,6 @@
+{
+  "name": "Greece Dog Food & Treats Catalog",
+  "description": "Comprehensive database of dog feeds and treats available in Greece with dietary info, ingredients, MSRP in Euros, and Google Sheets integration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
