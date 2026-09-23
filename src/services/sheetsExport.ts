@@ -85,16 +85,20 @@ export async function exportToGoogleSheet(
     'Channel Category',
     'Product Type',
     'Pet Age Group',
-    'Package Size',
+    'Canonical Package Size',
+    'All Available Packaging Sizes',
     'MSRP (€)',
     'Price / Kg (€/kg)',
-    'Item Image URL',
-    'Ingredients Label Image URL',
+    'Web Item Image URL',
+    'Web Ingredients Image URL',
+    'Google Drive Pack Photo',
+    'Google Drive Ingredients Label',
     'Official Product Link',
     'Skroutz.gr Price Link',
     'BestPrice.gr Price Link',
-    'Certifying Body / Quality Standard',
-    'Lab Report / Quality Audit URL',
+    'Quality & Manufacturing Standard',
+    'Independent 3rd-Party Lab Report Status',
+    'Lab Audit URL (If Verified)',
     'Animal Protein (%)',
     'EAN Barcode',
     'Crude Protein (%)',
@@ -119,15 +123,19 @@ export async function exportToGoogleSheet(
     p.productType,
     p.petAgeGroup,
     p.packageSize,
+    p.availableSizes ? p.availableSizes.join(', ') : p.packageSize,
     Number(p.msrpEuros.toFixed(2)),
     Number(p.pricePerKg.toFixed(2)),
     p.itemImageUrl || '',
     p.ingredientsImageUrl || '',
+    p.drivePackImageUrl || '',
+    p.driveIngredientsImageUrl || '',
     p.officialProductUrl,
     p.skroutzUrl || '',
     p.bestPriceUrl || '',
     p.certifyingBody || 'FEDIAF Standards Compliant',
-    p.labReportUrl || '',
+    p.hasIndependentLabReport ? 'Verified Independent Lab Audit' : 'Manufacturer In-House QA (Self-Declared)',
+    p.hasIndependentLabReport && p.labReportUrl ? p.labReportUrl : 'N/A (No Public 3rd-Party COA)',
     p.animalProteinPercent ? `${p.animalProteinPercent}%` : 'N/A',
     p.eanBarcode || 'N/A',
     p.nutritionalValues.crudeProteinPercent,
@@ -341,5 +349,182 @@ export async function exportToGoogleSheet(
     foodRowsCount: foodRows.length,
     treatsRowsCount: treatsRows.length,
     recipesRowsCount: recipeRows.length,
+  };
+}
+
+/**
+ * Searches user's Google Drive for an existing spreadsheet for a given Day,
+ * or creates a new one. Updates the contents in place to replace old data with new data,
+ * without wiping if there is no new data.
+ */
+export async function updateOrCreateDaySheet(
+  accessToken: string,
+  day: number,
+  brandNames: string[],
+  products: DogProduct[]
+): Promise<CreateSheetResult> {
+  const dayPrefix = `Greece Pet Food Vault - Day ${day}`;
+  const searchName = `${dayPrefix} (${brandNames.join(', ')})`;
+  
+  // Search Drive for spreadsheet with this title pattern
+  const query = encodeURIComponent(
+    `name contains 'Greece Pet Food Vault - Day ${day}' and mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false`
+  );
+  
+  let existingSpreadsheetId: string | null = null;
+  try {
+    const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name,webViewLink)`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (searchRes.ok) {
+      const searchData = await searchRes.json();
+      if (searchData.files && searchData.files.length > 0) {
+        existingSpreadsheetId = searchData.files[0].id;
+      }
+    }
+  } catch (err) {
+    console.warn('Could not check existing sheet, will create new:', err);
+  }
+
+  // Partition products into Food vs Treats
+  const foodProducts = products.filter(
+    (p) => p.productType === 'Dry Food' || p.productType === 'Wet Food'
+  );
+  const treatProducts = products.filter(
+    (p) => p.productType === 'Treats' || p.productType === 'Dental Chews'
+  );
+
+  const productHeaders = [
+    'Brand',
+    'Product Line',
+    'Flavor / Recipe',
+    'Channel Category',
+    'Product Type',
+    'Pet Age Group',
+    'Canonical Package Size',
+    'All Available Packaging Sizes',
+    'MSRP (€)',
+    'Price / Kg (€/kg)',
+    'Web Item Image URL',
+    'Web Ingredients Image URL',
+    'Google Drive Pack Photo',
+    'Google Drive Ingredients Label',
+    'Official Product Link',
+    'Skroutz.gr Price Link',
+    'BestPrice.gr Price Link',
+    'Quality & Manufacturing Standard',
+    'Independent 3rd-Party Lab Report Status',
+    'Lab Audit URL (If Verified)',
+    'Animal Protein (%)',
+    'EAN Barcode',
+    'Crude Protein (%)',
+    'Crude Fat (%)',
+    'Crude Fiber (%)',
+    'Ash (%)',
+    'Moisture (%)',
+    'Calories (kcal/kg)',
+    'Grain-Free',
+    'Allergens',
+    'Key Dietary & Nutritional Info',
+    'Ingredients List',
+    'Greece Retailers & Availability',
+    'Country of Origin',
+  ];
+
+  const mapProductToRow = (p: DogProduct) => [
+    p.brand,
+    p.productLine,
+    p.flavor,
+    p.channelCategory,
+    p.productType,
+    p.petAgeGroup,
+    p.packageSize,
+    p.availableSizes ? p.availableSizes.join(', ') : p.packageSize,
+    Number(p.msrpEuros.toFixed(2)),
+    Number(p.pricePerKg.toFixed(2)),
+    p.itemImageUrl || '',
+    p.ingredientsImageUrl || '',
+    p.drivePackImageUrl || '',
+    p.driveIngredientsImageUrl || '',
+    p.officialProductUrl,
+    p.skroutzUrl || '',
+    p.bestPriceUrl || '',
+    p.certifyingBody || 'FEDIAF Standards Compliant',
+    p.hasIndependentLabReport ? 'Verified Independent Lab Audit' : 'Manufacturer In-House QA (Self-Declared)',
+    p.hasIndependentLabReport && p.labReportUrl ? p.labReportUrl : 'N/A (No Public 3rd-Party COA)',
+    p.animalProteinPercent ? `${p.animalProteinPercent}%` : 'N/A',
+    p.eanBarcode || 'N/A',
+    p.nutritionalValues.crudeProteinPercent,
+    p.nutritionalValues.crudeFatPercent,
+    p.nutritionalValues.crudeFiberPercent,
+    p.nutritionalValues.crudeAshPercent ?? 'N/A',
+    p.nutritionalValues.moisturePercent ?? 'N/A',
+    p.nutritionalValues.caloricContentKcalKg ?? 'N/A',
+    p.grainFree ? 'Yes' : 'No',
+    p.allergens.join(', '),
+    p.specialDietaryInfo.join(' | '),
+    p.ingredients.join(', '),
+    p.greeceRetailers.join(', '),
+    p.countryOfOrigin,
+  ];
+
+  const foodRows = foodProducts.map(mapProductToRow);
+  const treatsRows = treatProducts.map(mapProductToRow);
+
+  // If no existing sheet found, create a brand new one
+  if (!existingSpreadsheetId) {
+    return exportToGoogleSheet(
+      accessToken,
+      products,
+      `${searchName} [${new Date().toLocaleDateString('en-GB')}]`
+    );
+  }
+
+  // If existing sheet exists, update values in place (clearing old rows and writing new)
+  const spreadsheetId = existingSpreadsheetId;
+  const spreadsheetUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit`;
+
+  // Helper to clear and write sheet
+  const overwriteSheet = async (sheetName: string, values: unknown[][]) => {
+    // 1. Clear existing range
+    await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/'${sheetName}'!A1:Z1000:clear`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    ).catch(() => {});
+
+    // 2. Put new values starting at A1
+    await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/'${sheetName}'!A1?valueInputOption=USER_ENTERED`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ values }),
+      }
+    );
+  };
+
+  // Only overwrite if we have rows or valid headers
+  if (foodRows.length > 0) {
+    await overwriteSheet('Dog Food', [productHeaders, ...foodRows]);
+  }
+  if (treatsRows.length > 0) {
+    await overwriteSheet('Dog Treats & Chews', [productHeaders, ...treatsRows]);
+  }
+
+  return {
+    spreadsheetId,
+    spreadsheetUrl,
+    foodRowsCount: foodRows.length,
+    treatsRowsCount: treatsRows.length,
+    recipesRowsCount: 0,
   };
 }

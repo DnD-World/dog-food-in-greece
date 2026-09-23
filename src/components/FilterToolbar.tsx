@@ -1,6 +1,6 @@
 import React from 'react';
 import { FilterState, PetAgeGroup, ProductType, ChannelCategory } from '../types';
-import { Search, RotateCcw, Filter, WheatOff, Store, ShoppingBag } from 'lucide-react';
+import { Search, RotateCcw, Filter, WheatOff, Store, ShoppingBag, CheckCircle2 } from 'lucide-react';
 
 interface FilterToolbarProps {
   filters: FilterState;
@@ -67,6 +67,7 @@ export const FilterToolbar: React.FC<FilterToolbarProps> = ({
       selectedTypes: [],
       selectedChannelCategories: [],
       grainFreeOnly: false,
+      verifiedOnly: false,
       maxPrice: 120,
       allergenFreeFilter: '',
       specialDiet: '',
@@ -80,6 +81,7 @@ export const FilterToolbar: React.FC<FilterToolbarProps> = ({
     filters.selectedTypes.length > 0 ||
     (filters.selectedChannelCategories && filters.selectedChannelCategories.length > 0) ||
     filters.grainFreeOnly ||
+    !!filters.verifiedOnly ||
     filters.allergenFreeFilter !== '' ||
     filters.maxPrice < 120;
 
@@ -220,7 +222,7 @@ export const FilterToolbar: React.FC<FilterToolbarProps> = ({
       </div>
 
       {/* Dietary & Allergen quick filters & price slider */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-2 border-t border-zinc-800/80">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-2 border-t border-zinc-800/80 items-center">
         <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-zinc-300">
           <input
             type="checkbox"
@@ -230,7 +232,19 @@ export const FilterToolbar: React.FC<FilterToolbarProps> = ({
             className="w-4 h-4 rounded bg-zinc-950 border-zinc-700 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-0"
           />
           <WheatOff className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Grain-Free Only (Χωρίς Σιτηρά)</span>
+          <span>Grain-Free Only</span>
+        </label>
+
+        <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-blue-300">
+          <input
+            type="checkbox"
+            id="verified-only-checkbox"
+            checked={!!filters.verifiedOnly}
+            onChange={(e) => onFilterChange({ ...filters, verifiedOnly: e.target.checked })}
+            className="w-4 h-4 rounded bg-zinc-950 border-zinc-700 text-blue-500 focus:ring-blue-500 focus:ring-offset-0"
+          />
+          <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
+          <span>Real-Life Verified Only</span>
         </label>
 
         <div>
@@ -250,7 +264,7 @@ export const FilterToolbar: React.FC<FilterToolbarProps> = ({
         </div>
 
         <div className="flex items-center gap-2 text-xs text-zinc-400">
-          <span>Max MSRP: €{filters.maxPrice}</span>
+          <span className="shrink-0">Max: €{filters.maxPrice}</span>
           <input
             type="range"
             id="max-price-slider"

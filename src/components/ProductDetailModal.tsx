@@ -11,6 +11,8 @@ import {
   Tag,
   Barcode,
   Image as ImageIcon,
+  CheckCircle2,
+  Clock,
 } from 'lucide-react';
 import { ImageModal } from './ImageModal';
 
@@ -65,6 +67,17 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   Made in {product.countryOfOrigin}
                 </span>
               )}
+              {product.isRealLifeVerified ? (
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/40 inline-flex items-center gap-1 font-semibold">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
+                  Real-Life Verified
+                </span>
+              ) : (
+                <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700/60 inline-flex items-center gap-1 font-medium">
+                  <Clock className="w-3 h-3 text-zinc-500" />
+                  Synthetic Estimate
+                </span>
+              )}
             </div>
 
             <h2 className="text-xl font-bold text-white mt-2">{product.flavor}</h2>
@@ -75,33 +88,8 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-zinc-950/70 p-3.5 rounded-xl border border-zinc-800">
             {/* Item Packaging Image */}
             <div className="flex items-center gap-3">
-              <div
-                onClick={() =>
-                  setActiveImageZoom({
-                    url: product.itemImageUrl,
-                    title: `${product.brand} - ${product.flavor}`,
-                    subtitle: `Packaging (${product.packageSize})`,
-                  })
-                }
-                className="w-20 h-20 shrink-0 rounded-lg overflow-hidden border border-zinc-700 bg-zinc-900 cursor-pointer group relative"
-              >
-                <img
-                  src={product.itemImageUrl}
-                  alt={product.flavor}
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover group-hover:scale-105 transition"
-                />
-                <span className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] text-white font-medium transition">
-                  Zoom
-                </span>
-              </div>
-              <div className="space-y-1">
-                <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider block">
-                  Product Packaging
-                </span>
-                <p className="text-xs text-zinc-400">Net: {product.packageSize}</p>
-                <button
-                  type="button"
+              {product.itemImageUrl ? (
+                <div
                   onClick={() =>
                     setActiveImageZoom({
                       url: product.itemImageUrl,
@@ -109,42 +97,57 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                       subtitle: `Packaging (${product.packageSize})`,
                     })
                   }
-                  className="text-[11px] text-emerald-400 hover:text-emerald-300 underline inline-flex items-center gap-1"
+                  className="w-20 h-20 shrink-0 rounded-lg overflow-hidden border border-zinc-700 bg-zinc-900 cursor-pointer group relative"
                 >
-                  <ImageIcon className="w-3 h-3" /> View full pack
-                </button>
+                  <img
+                    src={product.itemImageUrl}
+                    alt={product.flavor}
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover group-hover:scale-105 transition"
+                  />
+                  <span className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] text-white font-medium transition">
+                    Zoom
+                  </span>
+                </div>
+              ) : (
+                <div className="w-20 h-20 shrink-0 rounded-lg border border-dashed border-zinc-800 bg-zinc-950 flex flex-col items-center justify-center p-1.5 text-center">
+                  <ImageIcon className="w-5 h-5 text-zinc-600 mb-1" />
+                  <span className="text-[9px] text-zinc-500 leading-tight font-medium">No verified pack photo</span>
+                </div>
+              )}
+              <div className="space-y-1">
+                <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider block">
+                  Product Packaging
+                </span>
+                <p className="text-xs text-zinc-400">Net: {product.packageSize}</p>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {product.itemImageUrl ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setActiveImageZoom({
+                          url: product.itemImageUrl,
+                          title: `${product.brand} - ${product.flavor}`,
+                          subtitle: `Packaging (${product.packageSize})`,
+                        })
+                      }
+                      className="text-[11px] text-emerald-400 hover:text-emerald-300 underline inline-flex items-center gap-1"
+                    >
+                      <ImageIcon className="w-3 h-3" /> View full pack
+                    </button>
+                  ) : (
+                    <span className="text-[10px] text-zinc-500 italic">
+                      Pending verified photo
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
             {/* Ingredients Label Image */}
             <div className="flex items-center gap-3 border-t sm:border-t-0 sm:border-l border-zinc-800 pt-3 sm:pt-0 sm:pl-3">
-              <div
-                onClick={() =>
-                  setActiveImageZoom({
-                    url: product.ingredientsImageUrl,
-                    title: `${product.brand} - Composition & Nutrition Label`,
-                    subtitle: 'Official Guaranteed Ingredients',
-                  })
-                }
-                className="w-20 h-20 shrink-0 rounded-lg overflow-hidden border border-zinc-700 bg-zinc-900 cursor-pointer group relative"
-              >
-                <img
-                  src={product.ingredientsImageUrl}
-                  alt="Ingredients label"
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover group-hover:scale-105 transition"
-                />
-                <span className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] text-white font-medium transition">
-                  Zoom
-                </span>
-              </div>
-              <div className="space-y-1">
-                <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider block">
-                  Ingredients Label
-                </span>
-                <p className="text-xs text-zinc-400">Guaranteed Analysis Label</p>
-                <button
-                  type="button"
+              {product.ingredientsImageUrl ? (
+                <div
                   onClick={() =>
                     setActiveImageZoom({
                       url: product.ingredientsImageUrl,
@@ -152,12 +155,114 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                       subtitle: 'Official Guaranteed Ingredients',
                     })
                   }
-                  className="text-[11px] text-amber-400 hover:text-amber-300 underline inline-flex items-center gap-1"
+                  className="w-20 h-20 shrink-0 rounded-lg overflow-hidden border border-zinc-700 bg-zinc-900 cursor-pointer group relative"
                 >
-                  <ImageIcon className="w-3 h-3" /> View label image
-                </button>
+                  <img
+                    src={product.ingredientsImageUrl}
+                    alt="Ingredients label"
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover group-hover:scale-105 transition"
+                  />
+                  <span className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] text-white font-medium transition">
+                    Zoom
+                  </span>
+                </div>
+              ) : (
+                <div className="w-20 h-20 shrink-0 rounded-lg border border-dashed border-zinc-800 bg-zinc-950 flex flex-col items-center justify-center p-1.5 text-center">
+                  <ImageIcon className="w-5 h-5 text-zinc-600 mb-1" />
+                  <span className="text-[9px] text-zinc-500 leading-tight font-medium">No verified label photo</span>
+                </div>
+              )}
+              <div className="space-y-1">
+                <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider block">
+                  Ingredients Label
+                </span>
+                <p className="text-xs text-zinc-400">Guaranteed Analysis Label</p>
+                {product.ingredientsImageUrl ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setActiveImageZoom({
+                        url: product.ingredientsImageUrl,
+                        title: `${product.brand} - Composition & Nutrition Label`,
+                        subtitle: 'Official Guaranteed Ingredients',
+                      })
+                    }
+                    className="text-[11px] text-amber-400 hover:text-amber-300 underline inline-flex items-center gap-1"
+                  >
+                    <ImageIcon className="w-3 h-3" /> View label image
+                  </button>
+                ) : (
+                  <span className="text-[10px] text-zinc-500 italic">
+                    Pending verified photo
+                  </span>
+                )}
               </div>
             </div>
+          </div>
+
+          {/* Real-Life Market Verification Card */}
+          <div
+            className={`mt-4 p-3.5 rounded-xl border ${
+              product.isRealLifeVerified
+                ? 'bg-blue-950/20 border-blue-500/40'
+                : 'bg-zinc-950/70 border-zinc-800/80'
+            }`}
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-800/60 pb-2 mb-2.5">
+              <div className="flex items-center gap-2">
+                {product.isRealLifeVerified ? (
+                  <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" />
+                ) : (
+                  <Clock className="w-4 h-4 text-amber-400 shrink-0" />
+                )}
+                <span className="text-xs font-bold text-zinc-200">
+                  {product.isRealLifeVerified
+                    ? 'Current Week Real-Life Market Verification'
+                    : 'Pre-Trained Market Estimate'}
+                </span>
+                {product.verificationSourceType && (
+                  <span
+                    className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                      product.isRealLifeVerified
+                        ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                        : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                    }`}
+                  >
+                    {product.verificationSourceType}
+                  </span>
+                )}
+              </div>
+              {product.verificationDate && (
+                <span className="text-[11px] text-zinc-400 font-mono">
+                  {product.verificationDate}
+                </span>
+              )}
+            </div>
+
+            <p className="text-xs text-zinc-300 leading-relaxed">
+              {product.verificationMethod}
+            </p>
+
+            {product.verificationSourceUrl && (
+              <div className="mt-2.5 pt-2 border-t border-zinc-800/60 flex items-center justify-between gap-2 flex-wrap">
+                <span className="text-[11px] text-zinc-400">
+                  Audit Target:{' '}
+                  <strong className="text-zinc-200 font-mono text-[10px] break-all">
+                    {product.verificationSourceUrl}
+                  </strong>
+                </span>
+                <a
+                  href={product.verificationSourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs text-blue-400 hover:text-blue-300 underline inline-flex items-center gap-1 font-semibold"
+                >
+                  <span>Open Verification Source</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+            )}
           </div>
 
           {/* Pricing, Per-Kg, & Aggregator Links */}
@@ -173,6 +278,23 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                     ({product.packageSize} • €{product.pricePerKg.toFixed(2)}/kg)
                   </span>
                 </div>
+                {product.availableSizes && product.availableSizes.length > 1 && (
+                  <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[10px] text-zinc-400 font-medium">Available sizes:</span>
+                    {product.availableSizes.map((sz) => (
+                      <span
+                        key={sz}
+                        className={`text-[10px] px-1.5 py-0.5 rounded border font-mono ${
+                          sz === product.packageSize
+                            ? 'bg-emerald-950/60 text-emerald-300 border-emerald-500/40'
+                            : 'bg-zinc-900 text-zinc-400 border-zinc-800'
+                        }`}
+                      >
+                        {sz}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Barcode */}
@@ -286,21 +408,30 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               <ShieldCheck className="w-4 h-4 text-teal-400 shrink-0" />
               <div>
                 <span className="text-teal-300 font-semibold">
-                  Lab & Quality Standard Certification:
+                  Manufacturing & Quality Standard:
                 </span>{' '}
                 <span className="text-zinc-200">{product.certifyingBody || 'FEDIAF Industry Standard'}</span>
+                {!product.hasIndependentLabReport && (
+                  <span className="block text-[10px] text-zinc-400 mt-0.5">
+                    Manufacturer in-house QA declaration (No public 3rd-party lab COA published).
+                  </span>
+                )}
               </div>
             </div>
-            {product.labReportUrl && (
+            {product.hasIndependentLabReport && product.labReportUrl ? (
               <a
                 href={product.labReportUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-xs text-teal-300 hover:text-teal-200 underline font-medium"
               >
-                Official Quality / Audit Link
+                Verified Lab Audit / Certificate
                 <ExternalLink className="w-3 h-3" />
               </a>
+            ) : (
+              <span className="text-[10px] text-zinc-500 font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800">
+                Self-Certified / Standard Dossier
+              </span>
             )}
           </div>
 

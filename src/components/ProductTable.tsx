@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { DogProduct } from '../types';
-import { ExternalLink, AlertCircle, Image as ImageIcon, ShieldCheck, Tag } from 'lucide-react';
+import { ExternalLink, AlertCircle, Image as ImageIcon, ShieldCheck, Tag, CheckCircle2, Clock } from 'lucide-react';
 import { ImageModal } from './ImageModal';
 
 interface ProductTableProps {
@@ -37,6 +37,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({
             <thead className="sticky top-0 z-10 bg-zinc-950/95 backdrop-blur-xs border-b border-zinc-800 text-zinc-300 font-semibold uppercase tracking-wider text-[11px]">
               <tr>
                 <th className="py-3.5 px-3 text-center w-14">Images</th>
+                <th className="py-3.5 px-3 text-center min-w-[115px]">Real-Life Verified</th>
                 <th className="py-3.5 px-4 min-w-[170px]">Brand & Category</th>
                 <th className="py-3.5 px-4 min-w-[200px]">Flavor / Recipe</th>
                 <th className="py-3.5 px-3">Age Group</th>
@@ -71,55 +72,147 @@ export const ProductTable: React.FC<ProductTableProps> = ({
                     <td className="py-3 px-2 align-top text-center" onClick={(e) => e.stopPropagation()}>
                       <div className="flex flex-col gap-1.5 items-center">
                         {/* Item packaging thumbnail */}
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setActiveImageModal({
-                              url: product.itemImageUrl,
-                              title: `${product.brand} - ${product.flavor}`,
-                              subtitle: `Packaging (${product.packageSize})`,
-                            })
-                          }
-                          className="group relative w-10 h-10 rounded-lg overflow-hidden border border-zinc-700 bg-zinc-950 flex items-center justify-center hover:border-emerald-500 transition"
-                          title="Click to view packaging image"
-                        >
-                          <img
-                            src={product.itemImageUrl}
-                            alt={product.flavor}
-                            referrerPolicy="no-referrer"
-                            className="w-full h-full object-cover group-hover:scale-110 transition duration-150"
-                            loading="lazy"
-                          />
-                          <span className="absolute bottom-0 right-0 bg-black/70 text-[9px] px-1 text-zinc-300 rounded-tl">
-                            Pack
-                          </span>
-                        </button>
+                        {product.itemImageUrl ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setActiveImageModal({
+                                url: product.itemImageUrl,
+                                title: `${product.brand} - ${product.flavor}`,
+                                subtitle: `Packaging (${product.packageSize})`,
+                              })
+                            }
+                            className="group relative w-10 h-10 rounded-lg overflow-hidden border border-zinc-700 bg-zinc-950 flex items-center justify-center hover:border-emerald-500 transition"
+                            title="Click to view packaging image"
+                          >
+                            <img
+                              src={product.itemImageUrl}
+                              alt={product.flavor}
+                              referrerPolicy="no-referrer"
+                              className="w-full h-full object-cover group-hover:scale-110 transition duration-150"
+                              loading="lazy"
+                            />
+                            <span className="absolute bottom-0 right-0 bg-black/70 text-[9px] px-1 text-zinc-300 rounded-tl">
+                              Pack
+                            </span>
+                          </button>
+                        ) : (
+                          <div
+                            className="w-10 h-10 rounded-lg border border-dashed border-zinc-800 bg-zinc-950/80 flex items-center justify-center text-[9px] text-zinc-500 text-center font-mono"
+                            title="No verified packaging photo yet"
+                          >
+                            No Pic
+                          </div>
+                        )}
 
                         {/* Ingredients label thumbnail */}
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setActiveImageModal({
-                              url: product.ingredientsImageUrl,
-                              title: `${product.brand} - Composition & Ingredients Label`,
-                              subtitle: 'Guaranteed Analysis & Formulation',
-                            })
-                          }
-                          className="group relative w-10 h-10 rounded-lg overflow-hidden border border-zinc-700 bg-zinc-950 flex items-center justify-center hover:border-amber-500 transition"
-                          title="Click to view ingredients and nutrition label"
-                        >
-                          <img
-                            src={product.ingredientsImageUrl}
-                            alt="Ingredients label"
-                            referrerPolicy="no-referrer"
-                            className="w-full h-full object-cover group-hover:scale-110 transition duration-150"
-                            loading="lazy"
-                          />
-                          <span className="absolute bottom-0 right-0 bg-black/70 text-[9px] px-1 text-amber-300 rounded-tl">
-                            Label
-                          </span>
-                        </button>
+                        {product.ingredientsImageUrl ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setActiveImageModal({
+                                url: product.ingredientsImageUrl,
+                                title: `${product.brand} - Composition & Ingredients Label`,
+                                subtitle: 'Guaranteed Analysis & Formulation',
+                              })
+                            }
+                            className="group relative w-10 h-10 rounded-lg overflow-hidden border border-zinc-700 bg-zinc-950 flex items-center justify-center hover:border-amber-500 transition"
+                            title="Click to view ingredients and nutrition label"
+                          >
+                            <img
+                              src={product.ingredientsImageUrl}
+                              alt="Ingredients label"
+                              referrerPolicy="no-referrer"
+                              className="w-full h-full object-cover group-hover:scale-110 transition duration-150"
+                              loading="lazy"
+                            />
+                            <span className="absolute bottom-0 right-0 bg-black/70 text-[9px] px-1 text-amber-300 rounded-tl">
+                              Label
+                            </span>
+                          </button>
+                        ) : (
+                          <div
+                            className="w-10 h-10 rounded-lg border border-dashed border-zinc-800 bg-zinc-950/80 flex items-center justify-center text-[9px] text-zinc-500 text-center font-mono"
+                            title="No verified label photo yet"
+                          >
+                            No Lbl
+                          </div>
+                        )}
                       </div>
+                    </td>
+
+                    {/* Real-Life Verified Status Badge with Mouseover Popover */}
+                    <td className="py-3 px-3 align-top text-center" onClick={(e) => e.stopPropagation()}>
+                      {product.isRealLifeVerified ? (
+                        <div className="relative group/verify inline-block">
+                          <div
+                            id={`verified-badge-${product.id}`}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/35 text-[11px] font-semibold cursor-help hover:bg-blue-500/25 transition shadow-xs"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                            <span>Verified</span>
+                          </div>
+
+                          {/* Hover Tooltip / Detail Card */}
+                          <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover/verify:block z-50 w-72 p-3 bg-zinc-900/98 border border-blue-500/50 rounded-xl shadow-2xl text-left pointer-events-auto backdrop-blur-md">
+                            <div className="flex items-center gap-1.5 text-blue-400 font-bold text-xs border-b border-zinc-800 pb-1.5 mb-2">
+                              <CheckCircle2 className="w-4 h-4 shrink-0 text-blue-400" />
+                              <span>Real-Life Data Verified</span>
+                            </div>
+                            <div className="space-y-1.5 text-[11px] text-zinc-300">
+                              <div>
+                                <span className="text-zinc-400 font-medium">Source Type: </span>
+                                <span className="text-blue-300 font-semibold">{product.verificationSourceType}</span>
+                              </div>
+                              <div>
+                                <span className="text-zinc-400 font-medium">Method: </span>
+                                <span className="text-zinc-200">{product.verificationMethod}</span>
+                              </div>
+                              {product.verificationDate && (
+                                <div>
+                                  <span className="text-zinc-400 font-medium">Date: </span>
+                                  <span className="text-zinc-200 font-mono">{product.verificationDate}</span>
+                                </div>
+                              )}
+                              {product.verificationSourceUrl && (
+                                <div className="pt-1.5 mt-1 border-t border-zinc-800">
+                                  <a
+                                    href={product.verificationSourceUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 underline font-mono text-[10px] break-all"
+                                  >
+                                    <span>Visit Verification Source</span>
+                                    <ExternalLink className="w-3 h-3 shrink-0" />
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="relative group/verify inline-block">
+                          <div
+                            id={`unverified-badge-${product.id}`}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-800/80 text-zinc-400 border border-zinc-700/60 text-[10px] font-medium cursor-help hover:bg-zinc-800 transition"
+                          >
+                            <Clock className="w-3 h-3 text-zinc-500 shrink-0" />
+                            <span>Synthetic</span>
+                          </div>
+
+                          {/* Hover Tooltip for Synthetic/Unverified */}
+                          <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover/verify:block z-50 w-64 p-2.5 bg-zinc-900/98 border border-zinc-700/80 rounded-xl shadow-2xl text-left pointer-events-none backdrop-blur-md">
+                            <div className="flex items-center gap-1.5 text-zinc-300 font-semibold text-xs border-b border-zinc-800 pb-1 mb-1.5">
+                              <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                              <span>Pre-Trained Market Model</span>
+                            </div>
+                            <p className="text-[10px] text-zinc-400 leading-relaxed">
+                              {product.verificationMethod ||
+                                'This record is an unverified estimate based on pre-trained market defaults. Live scraping verification is pending.'}
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </td>
 
                     {/* Brand & Category */}
@@ -192,7 +285,12 @@ export const ProductTable: React.FC<ProductTableProps> = ({
 
                     {/* Size */}
                     <td className="py-3 px-3 align-top whitespace-nowrap text-zinc-400 font-mono">
-                      {product.packageSize}
+                      <div>{product.packageSize}</div>
+                      {product.availableSizes && product.availableSizes.length > 1 && (
+                        <div className="text-[9px] text-zinc-500 font-sans mt-0.5">
+                          +{product.availableSizes.length - 1} sizes
+                        </div>
+                      )}
                     </td>
 
                     {/* MSRP in Euros */}
@@ -235,7 +333,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({
                           <ShieldCheck className="w-3.5 h-3.5 text-teal-400 shrink-0" />
                           <span>{product.certifyingBody || 'FEDIAF Standards'}</span>
                         </div>
-                        {product.labReportUrl && (
+                        {product.hasIndependentLabReport && product.labReportUrl ? (
                           <a
                             href={product.labReportUrl}
                             target="_blank"
@@ -245,6 +343,10 @@ export const ProductTable: React.FC<ProductTableProps> = ({
                             Lab Audit Report
                             <ExternalLink className="w-2.5 h-2.5" />
                           </a>
+                        ) : (
+                          <span className="text-[10px] text-zinc-500 font-mono block">
+                            Internal QA / Self-Decl.
+                          </span>
                         )}
                       </div>
                     </td>

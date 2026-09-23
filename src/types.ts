@@ -15,6 +15,13 @@ export interface NutritionalValues {
   crudeAshPercent?: number;
   moisturePercent?: number;
   caloricContentKcalKg?: number;
+  calciumPercent?: number;
+  phosphorusPercent?: number;
+  omega3Percent?: number;
+  omega6Percent?: number;
+  dhaPercent?: number;
+  epaPercent?: number;
+  calorieBreakdown?: string;
 }
 
 export interface DogProduct {
@@ -26,25 +33,39 @@ export interface DogProduct {
   channelCategory: ChannelCategory;
   petAgeGroup: PetAgeGroup;
   packageSize: string;
+  availableSizes?: string[]; // e.g. ["800g", "2.5kg", "12kg"] grouped under this canonical flavor
   msrpEuros: number;
   pricePerKg: number;
   eanBarcode?: string;
   officialProductUrl: string;
   itemImageUrl: string;
   ingredientsImageUrl: string;
+  drivePackImageUrl?: string; // Direct Google Drive View/Download link in user's vault
+  driveIngredientsImageUrl?: string; // Direct Google Drive View/Download link for ingredients panel
   skroutzUrl: string;
   bestPriceUrl: string;
-  certifyingBody: string; // e.g. "FEDIAF & TÜV SÜD Food Safety", "Eurofins Scientific Certified Batch", "BRCGS Grade AA"
-  labReportUrl: string;
+  certifyingBody: string; // e.g. "DLG Gold Award (Bavaria)", "FEDIAF European Pet Food Standards", "ISO 22000 Food Safety"
+  hasIndependentLabReport?: boolean; // Transparent: true ONLY if genuine 3rd-party lab analysis exists
+  labReportUrl?: string; // Empty if no public independent lab test is available
   animalProteinPercent: number; // e.g. 90% for Farmina, 20% for generic supermarket
   greeceRetailers: string[]; // e.g. Sklavenitis, AB Vassilopoulos, Lidl, Pet City, Petvet24, Skroutz, BestPrice
   ingredients: string[];
+  additives?: string;
   keyIngredientsSummary: string;
   nutritionalValues: NutritionalValues;
   allergens: string[];
   grainFree: boolean;
   specialDietaryInfo: string[]; // e.g. "Hypoallergenic", "Monoprotein", "Joint Support", "Sensitive Digestion"
   countryOfOrigin: string;
+  isRealLifeVerified: boolean;
+  verificationMethod?: string;
+  verificationSourceUrl?: string;
+  verificationDate?: string;
+  verificationSourceType?:
+    | 'Supermarket Official Site'
+    | 'Aggregator (Skroutz/BestPrice)'
+    | 'Brand Official Portal'
+    | 'Synthetic / Unverified';
 }
 
 export interface FilterState {
@@ -54,6 +75,7 @@ export interface FilterState {
   selectedTypes: ProductType[];
   selectedChannelCategories: ChannelCategory[];
   grainFreeOnly: boolean;
+  verifiedOnly?: boolean;
   maxPrice: number;
   allergenFreeFilter: string;
   specialDiet: string;
